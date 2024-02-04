@@ -1,0 +1,1 @@
+status = (("Available", "Available"), ("Assigned", "Assigned"),("Under repair", "Under repair"))
