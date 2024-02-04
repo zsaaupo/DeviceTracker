@@ -12,6 +12,9 @@ class Device(models.Model):
     condition = models.TextField(blank=True)
     current_assigned_employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name="current_devices")
 
+    def __str__(self):
+        return self.name + " " + self.device_type + " " + self.device_model
+
 class AssignDevice(models.Model):
 
     device = models.ForeignKey(Device, on_delete=models.PROTECT, related_name="assignments")
@@ -21,3 +24,6 @@ class AssignDevice(models.Model):
     condition_before = models.TextField(null=True, blank=True)
     condition_after = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.device.name + " " + self.employee.name
