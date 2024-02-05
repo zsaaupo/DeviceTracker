@@ -168,8 +168,8 @@ class ApiNewEmployee(CreateAPIView):
                 employee.user = user
                 employee.company = company
                 employee.name = data['name']
-                employee.company_email = data['email']
-                employee.company_phone_number = data['phone']
+                employee.employee_email = data['email']
+                employee.employee_phone_number = data['phone']
                 employee.designation = data['designation']
                 employee.save()
 

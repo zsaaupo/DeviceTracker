@@ -17,13 +17,10 @@ class Device(models.Model):
 
 class AssignDevice(models.Model):
 
-    device = models.ForeignKey(Device, on_delete=models.PROTECT, related_name="assignments")
-    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name="assignments")
+    device = models.ForeignKey(Device, on_delete=models.PROTECT, related_name="assignments", null=True, blank=True)
+    employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name="assignments", null=True, blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
     condition_before = models.TextField(null=True, blank=True)
     condition_after = models.TextField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return self.device.name + " " + self.employee.name

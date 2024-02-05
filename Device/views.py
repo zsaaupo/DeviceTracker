@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group, Permission
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_409_CONFLICT
 from .models import Device, AssignDevice
 from Company.models import Company, Employee
@@ -71,7 +71,8 @@ class ApiAddDevice(CreateAPIView):
 
 class ApiAssignDevice(CreateAPIView):
 
-    permission_classes = [IsCompanyUser or IsEmployeeUser]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         result = {}
         try:
@@ -96,34 +97,28 @@ class ApiAssignDevice(CreateAPIView):
 
             device = Device.objects.filter(name=data['device_name'], status="Available").first()
 
-            employee = Employee.objects.filter(employee_email=data['employee_email']).first()
-
-            if device:
-                assign = AssignDevice()
-                assign.device = device
-                assign.employee = employee
-                assign.start_date = data['start_date']
-                assign.end_date = data['end_date']
-                assign.condition_before = data['condition_before']
-                assign.condition_after = data['condition_after']
-                assign.notes = data['notes']
-
-                if employee:
-                    assign.employee = employee
-                else:
-                    result['status'] = HTTP_400_BAD_REQUEST
-                    result['message'] = "Employee not found"
-                    return Response(result)
-                assign.save()
-
-                result['status'] = HTTP_200_OK
-                result['message'] = "Assigned"
-                return Response(result)
-
-            else:
+            if not device:
                 result['status'] = HTTP_409_CONFLICT
                 result['message'] = "Device not avaiable"
                 return Response(result)
+
+            employee = Employee.objects.filter(employee_email=data['employee_email']).first()
+            print(employee)
+
+            assign = AssignDevice()
+            assign.device = device
+            assign.employee = employee
+            assign.start_date = data['start_date']
+            assign.end_date = data['end_date']
+            assign.condition_before = data['condition_before']
+            assign.condition_after = data['condition_after']
+            assign.notes = data['notes']
+            assign.employee = employee
+            assign.save()
+
+            result['status'] = HTTP_200_OK
+            result['message'] = "Assigned"
+            return Response(result)
 
         except Exception as ex:
             return Response(str(ex))

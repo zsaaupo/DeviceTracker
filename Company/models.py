@@ -19,7 +19,7 @@ class Employee(models.Model):
     name = models.CharField(max_length=255)
     designation = models.CharField(max_length=255)
     employee_phone_number = models.CharField(max_length=255)
-    employee_email = models.CharField(max_length=255)
+    employee_email = models.EmailField()
 
     def __str__(self):
         return self.name + " " + self.designation
