@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group, Permission
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_409_CONFLICT
@@ -42,6 +42,10 @@ class ApiAddDevice(CreateAPIView):
                 result['massage'] = "company_email can not be null."
                 result['error'] = "company_email"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
+            if 'serial_number' not in data or data['serial_number'] == '':
+                result['massage'] = "device_name can not be null."
+                result['error'] = "serial_number"
+                return Response(result, status=HTTP_400_BAD_REQUEST)
 
             company = Company.objects.get(company_email=data['company_email'])
 
@@ -52,6 +56,7 @@ class ApiAddDevice(CreateAPIView):
 
             device = Device()
             device.name = data['name']
+            device.serial_number = data['serial_number']
             device.device_type = data['device_type']
             device.device_model = data['device_model']
             device.status = data['status']
@@ -81,44 +86,77 @@ class ApiAssignDevice(CreateAPIView):
                 result['massage'] = "start_date can not be null."
                 result['error'] = "start_date"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
-            if 'end_date' not in data or data['device_type'] == '':
-                result['massage'] = "device_type can not be null."
-                result['error'] = "device_type"
+            if 'end_date' not in data or data['end_date'] == '':
+                result['massage'] = "end_date can not be null."
+                result['error'] = "end_date"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
             if 'employee_email' not in data or data['employee_email'] == '':
                 result['massage'] = "employee_email can not be null."
                 result['error'] = "employee_email"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
-
-            if 'device_name' not in data or data['device_name'] == '':
+            if 'serial_number' not in data or data['serial_number'] == '':
                 result['massage'] = "device_name can not be null."
-                result['error'] = "device_name"
+                result['error'] = "serial_number"
                 return Response(result, status=HTTP_400_BAD_REQUEST)
 
-            device = Device.objects.filter(name=data['device_name'], status="Available").first()
-
-            if not device:
-                result['status'] = HTTP_409_CONFLICT
-                result['message'] = "Device not avaiable"
-                return Response(result)
-
+            device = Device.objects.filter(serial_number=data['serial_number']).first()
             employee = Employee.objects.filter(employee_email=data['employee_email']).first()
-            print(employee)
 
-            assign = AssignDevice()
-            assign.device = device
-            assign.employee = employee
-            assign.start_date = data['start_date']
-            assign.end_date = data['end_date']
-            assign.condition_before = data['condition_before']
-            assign.condition_after = data['condition_after']
-            assign.notes = data['notes']
-            assign.employee = employee
-            assign.save()
+            if 'is_checked_out' in data and data['is_checked_out'].lower() == "true":
 
-            result['status'] = HTTP_200_OK
-            result['message'] = "Assigned"
-            return Response(result)
+                if device.status == "Assigned":
+
+                    result['status'] = HTTP_409_CONFLICT
+                    result['message'] = "Device not available"
+                    return Response(result)
+
+                else:
+                    assign = AssignDevice()
+                    assign.device = device
+                    assign.start_date = data['start_date']
+                    assign.end_date = data['end_date']
+                    assign.condition_before = data['condition_before']
+                    assign.notes = data['notes']
+                    assign.is_checked_out = True
+                    assign.employee = employee
+                    assign.save()
+
+                    device.status = "Assigned"
+                    device.current_assigned_employee = employee
+                    device.save()
+
+                    result['status'] = HTTP_200_OK
+                    result['message'] = "Assigned"
+                    return Response(result)
+
+            elif 'is_checked_out' in data and data['is_checked_out'].lower() == "false":
+
+                if device.status == "Available":
+
+                    result['status'] = HTTP_409_CONFLICT
+                    result['message'] = "Device already returned"
+                    return Response(result)
+
+                else:
+
+                    assign = AssignDevice()
+                    assign.device = device
+                    assign.start_date = data['start_date']
+                    assign.end_date = data['end_date']
+                    assign.condition_before = data['condition_before']
+                    assign.condition_after = data['condition_after']
+                    assign.notes = data['notes']
+                    assign.is_checked_out = False
+                    assign.employee = employee
+                    assign.save()
+
+                    device.status = "Available"
+                    device.current_assigned_employee = None
+                    device.save()
+
+                    result['status'] = HTTP_200_OK
+                    result['message'] = "Returned"
+                    return Response(result)
 
         except Exception as ex:
             return Response(str(ex))

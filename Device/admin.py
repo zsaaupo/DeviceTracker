@@ -7,6 +7,7 @@ class DeviceAdmin(admin.ModelAdmin):
     fields = [
         "company",
         "name",
+        "serial_number",
         "device_type",
         "device_model",
         "status",
@@ -30,6 +31,7 @@ class AssignDeviceAdmin(admin.ModelAdmin):
         "employee",
         "start_date",
         "end_date",
+        "is_checked_out",
         "condition_before",
         "condition_after",
         "notes"
