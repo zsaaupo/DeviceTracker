@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AssignDevice
+from .models import AssignDevice, Device
 
 class AssignDeviceSerializer(serializers.ModelSerializer):
 
@@ -21,4 +21,22 @@ class AssignDeviceSerializer(serializers.ModelSerializer):
             "condition_after",
             "notes",
             "is_checked_out",
+        ]
+
+class DeviceSerializer(serializers.ModelSerializer):
+
+    employee_name = serializers.CharField(source='current_assigned_employee.name', read_only=True, allow_null=True)
+    employee_designation = serializers.CharField(source='current_assigned_employee.designation', read_only=True, allow_null=True)
+
+    class Meta:
+        model = Device
+        fields = [
+            "name",
+            "serial_number",
+            "device_type",
+            "device_model",
+            "status",
+            "condition",
+            "employee_name",
+            "employee_designation"
         ]

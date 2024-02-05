@@ -6,7 +6,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_200_OK, HTTP_409_CONFLICT
 from .models import Device, AssignDevice
 from Company.models import Company, Employee
-from .serializer import AssignDeviceSerializer
+from .serializer import AssignDeviceSerializer, DeviceSerializer
 
 class IsCompanyUser(BasePermission):
     def has_permission(self, request, view):
@@ -173,3 +173,22 @@ class ApiDeviceAssignmentLog(ListAPIView):
         assignmentLog = AssignDeviceSerializer(assignmentLog, many=True).data
 
         return Response(assignmentLog)
+
+
+class ApiDeviceStatus(ListAPIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serial_number = request.GET.get('serial_number')
+        if serial_number:
+            print("Haai")
+            deviceStatus = Device.objects.filter(serial_number=serial_number).all()
+            deviceStatus = DeviceSerializer(deviceStatus, many=True).data
+            return Response(deviceStatus)
+
+        else:
+
+            deviceStatus = Device.objects.all()
+            deviceStatus = DeviceSerializer(deviceStatus, many=True).data
+            return Response(deviceStatus)
