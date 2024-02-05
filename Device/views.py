@@ -182,7 +182,6 @@ class ApiDeviceStatus(ListAPIView):
     def get(self, request):
         serial_number = request.GET.get('serial_number')
         if serial_number:
-            print("Haai")
             deviceStatus = Device.objects.filter(serial_number=serial_number).all()
             deviceStatus = DeviceSerializer(deviceStatus, many=True).data
             return Response(deviceStatus)
