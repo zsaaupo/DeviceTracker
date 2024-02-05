@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group, Permission
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_201_CREATED, HTTP_409_CONFLICT
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_409_CONFLICT
 from django.contrib.auth.hashers import make_password
 from .models import Company, Employee
 
@@ -90,6 +90,7 @@ class ApiCreateCompany(CreateAPIView):
 class IsCompanyUser(BasePermission):
     def has_permission(self, request, view):
         return request.user.groups.filter(name='Company').exists()
+
 
 class ApiNewEmployee(CreateAPIView):
 

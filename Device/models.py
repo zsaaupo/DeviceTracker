@@ -8,8 +8,8 @@ class Device(models.Model):
     name = models.CharField(max_length=255)
     device_type = models.CharField(max_length=255)
     device_model = models.CharField(max_length=255)
-    status = models.CharField(max_length=50, choices=status, default="Available")
-    condition = models.TextField(blank=True)
+    status = models.CharField(max_length=50, choices=(("Available", "Available"), ("Assigned", "Assigned"),("Under repair", "Under repair")), default="Available")
+    condition = models.TextField(null=True, blank=True)
     current_assigned_employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name="current_devices")
 
     def __str__(self):
